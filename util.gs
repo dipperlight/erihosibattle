@@ -12,6 +12,8 @@ function range(min, max) {
   return min == max ? max : min + "~" + max
 }
 
+// インスタンスのクローンを提供する基底クラス
+// http://var.blog.jp/archives/78945827.html
 class Clonable {
   clone() {
     const clone = Object.create(this)
