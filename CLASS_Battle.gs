@@ -286,3 +286,19 @@ class Command {
   static get DEFENCE_COMMAND(){return ['通常防御','全力防御','回避体勢','魔法防御','逃走']}
 }
 
+class BattleLog{
+  constructor(){
+    this.texts= []
+    this.events=[]
+  }
+
+  /* TODO */  
+  log(text){
+    this.texts.push(text)
+    this.events.push(['log',text])
+  }
+
+  relust(){
+    return this.texts.join("\n")
+  }
+}
