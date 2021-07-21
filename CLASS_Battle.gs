@@ -78,14 +78,14 @@ class Battle {
           if ( ! ['専守防衛'].includes(offensive_command) && eob){ // 専守防衛のときはまるごと飛ばす
             //弱点
             if(tc.weapon.element==te.week_element){
-              const week_effect = battle_dice(tc.weapon.rank)
+              const week_effect = Battle.battle_dice(tc.weapon.rank)
               tc.atk += week_effect
             }
 
             //魔法攻撃詠唱 後手で魔力減少攻撃を受けてMPが0以下になった場合不発　/* UNCERTAIN */
             if(offensive_command == '魔法攻撃' && tc.mp>=1){
               if(tc.mp>=1){
-                const matk_effect = min(battle_dice(tc.matk.dice),tc.matk.max)
+                const matk_effect = min(Battle.battle_dice(tc.matk.dice),tc.matk.max)
                 tc.atk += matk_effect
                 if (['杖'].includes(tc.weapon.type)){
                   tc.atk += tc.weapon.magic_value
@@ -101,7 +101,7 @@ class Battle {
 
             // 敵の回避
             if(avo_dice>0){
-              const avo_effect = battle_dice(avo_dice)
+              const avo_effect = Battle.battle_dice(avo_dice)
               te.def += avo_effect
             }
 
@@ -140,14 +140,14 @@ class Battle {
             if(te.special_atk_dice>0){
               const act_special_dice = max(0,te.special_dice - tc.special_reduce - ( te.special_element==tc.armor.element?tc.armor.rank:0))
               if (act_special_dice>0){
-                const special_effect = battle_dice(act_special_dice)
+                const special_effect = Battle.battle_dice(act_special_dice)
                 te.atk += special_effect
               }
             }
 
             // PCの魔法防御詠唱
             if(defensive_command == '魔法防御' && tc.mp>=1){
-              const mdef_effect = min(battle_dice(tc.mdef.dice),tc.mdef.max)
+              const mdef_effect = min(Battle.battle_dice(tc.mdef.dice),tc.mdef.max)
               tc.def += mdef_effect
               tc_mp--
               if (tc.mdef.free){
@@ -160,7 +160,7 @@ class Battle {
 
             // PCの回避
             if(avo_dice>0){
-              const avo_effect = battle_dice(avo_dice)
+              const avo_effect = Battle.battle_dice(avo_dice)
               tc.def += avo_effect
             }
 
@@ -237,7 +237,14 @@ class Battle {
   }
 
 // ***************************************************************************
-
+  static battle_dice(n){
+    let sum =0;
+    for (let i=0;i<n;i++){
+      const deme = Math.floor( Math.random() * 11 )
+      sum += deme==10? 15 : (deme==1? -3 : deme)
+    }
+    return sum<0?0:sum
+  }
 }
 
 
@@ -277,15 +284,5 @@ class Command {
   
   static get ATTACK_COMMAND(){return ['通常攻撃','全力攻撃','正確攻撃','魔法攻撃','専守防衛']}
   static get DEFENCE_COMMAND(){return ['通常防御','全力防御','回避体勢','魔法防御','逃走']}
-}
-
-
-function battle_dice(n){
-  let sum =0;
-  for (let i=0;i<n;i++){
-    const deme = Math.floor( Math.random() * 11 )
-    sum += deme==10? 15 : (deme==1? -3 : deme)
-  }
-  return sum<0?0:sum
 }
 
