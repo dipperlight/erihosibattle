@@ -96,25 +96,26 @@ class Battle {
                 }
               }
             }
+            // 必中判定
+            const avo_dice = te.avo - tc.hit
 
-            //敵の回避判定
-            if(te.avo > tc.hit){              
-              const avo_effect = battle_dice(te.avo - tc.hit)
+            // 敵の回避
+            if(avo_dice>0){
+              const avo_effect = battle_dice(avo_dice)
               te.def += avo_effect
             }
 
-            //重武器による防御貫通は敵の回避による防御上昇の後に判定されるのか否か？　ここでは上がった防御ごと削れると扱う
-            //ここはよくわからん、最悪、辛セットの前に発動してる可能性もあるし /* UNCERTAIN */
+            //重武器による防御貫通
+            // 敵の回避による防御上昇の後に判定されるのか否か？　ここでは上がった防御ごと削れると扱う
+            //ここはよくわからん、最悪、辛セットの前に発動してる可能性もある /* UNCERTAIN */
             if(tc.weapon.weight=='重'){
-              const heavy_penetrate_effect = Math.floor(te.def*(20-te.rank)/100)
-              te.def -= heavy_penetrate_effect
+              const penetrate_effect = Math.floor(te.def*(20-te.rank)/100)
+              te.def -= penetrate_effect
             }
 
             // ダメージ算出
             const damage = tc.atk - te.def
-
-            // 必中判定
-            if (tc.hit>=te.avo){　//同値はPC有利のため必中有り
+            if (avo_dice<=0){
               const crit_effect = Math.floor(damage * tc.crit_multi)
               damage += crit_effect
             }
@@ -154,17 +155,18 @@ class Battle {
               }
             }
 
+            // 必中判定
+            const avo_dice = tc.avo - te.hit
+
             // PCの回避
-            if(tc.avo > te.hit){
-              const avo_effect = battle_dice(tc.avo  - te.hit)
+            if(avo_dice>0){
+              const avo_effect = battle_dice(avo_dice)
               tc.def += avo_effect
             }
 
             // ダメージ算出
             const damage = max(te.atk - tc.def,0)
-
-            // 必中判定
-            if (te.hit>tc.avo){ //同値はPC有利のため必中なし
+            if (avo_dice<0){
               const crit_effect = Math.floor(damage * tc.crit_taken)
               damage += crit_effect
             }
