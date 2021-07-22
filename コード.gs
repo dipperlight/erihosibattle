@@ -15,11 +15,11 @@ var update_battle_group = ()=>{
   const rangeRow = cell.getRow();
   const rangeCol = cell.getColumn();
   const value = cell.getValue();
-  //console.log("**"+sheet.getName()+" , "+rangeRow+" , "+rangeCol+", "+value)
+  // Logger.log("**"+sheet.getName()+" , "+rangeRow+" , "+rangeCol+", "+value)
 
   if (sheet.getName()==BATTLE_SHEET_NAME && (rangeRow==ENEMY_CELL_ROW&&rangeCol==ENEMY_CELL_COL)) {
     const enemies = ss.getSheetByName(CALC_SHEET_NAME).getRange(ENEMYLIST_POS_ROW,ENEMYLIST_POS_COL,MAX_ENEMY_ROW,ENEMY_COL_SIZE).getValues();
-    //console.log(JSON.stringify(enemies))
+    // Logger.log(JSON.stringify(enemies))
     let enemy_view = new Array(MAX_ENEMY_ROW).fill(new Array(ENEMY_COL_SIZE).fill(''));
     for (let i=0;i<MAX_ENEMY_ROW;i++){
       enemy_view[i] =(function (enemy){
@@ -42,7 +42,7 @@ var update_battle_group = ()=>{
        ]:new Array(15).fill('-');
       }( new Enemy(...enemies[i])))
     }
-    //console.log(JSON.stringify(enemy_view))
+    // Logger.log(JSON.stringify(enemy_view))
     sheet.getRange(6,6,enemy_view.length,enemy_view[0].length).setValues(enemy_view)
   }
   return

@@ -1,3 +1,16 @@
+
+var debug = () => {
+  const dummy_battleCharactor = new BattleCharactor(new Item('〈風刃：サバンナ〉武具(7)/38/13/12/風/【木天蓼】作。武具：弓矢系。'),new Item('〈魔動式カラクリ鳳仙花〉防具(7)/20/13/12/辛/【木天蓼】作。防具：護符系。'),'魚人','武闘家','技巧',3,)
+  const dummy_enemy = new Enemy('ダミー','草原',2,10,10,10,10,10,'器物',10,false,0,'風','地',2)
+  const dummy_command = new Command('全力攻撃','専守防衛','魔法攻撃','通常防御','全力防御','逃走')
+  const dummy_area = '草原'
+  
+  dummy_battle = new Battle(dummy_battleCharactor, dummy_enemy, dummy_command, dummy_area)
+
+  let ret = dummy_battle.run(1000)
+  return
+}
+
 class Battle {
   constructor(battle_charactor,enemy,command,area){
     this.character = battle_charactor.clone()
@@ -11,10 +24,14 @@ class Battle {
     let text =''
     let eob = true // 戦闘終了フラグ falseで戦闘終了
     let result = 0 // 1:勝利 0:引き分け -1:敗北
+    const log = new BattleLog()
     const c = this.character.clone()
-    const e = this.enemy.clone()
+    const e = this.enemy.clone() 
     const hp_before = c.hp
     const mp_before = c.mp
+
+    //ログテスト
+    log.text('test,戦闘開始')
 
     // 戦闘開始前処理 ***********************
     // 魔力耐性
@@ -27,7 +44,7 @@ class Battle {
     }
 
     // 特殊地形(聖域・原始林)処理
-    switch (area) {
+    switch (this.area) {
       case '聖域':
       /* FALLTHROUGH */
       case '原始林':
@@ -67,7 +84,7 @@ class Battle {
       tc.command(offensive_command,defensive_command)
 
       //行動順判定 PC先手：true PC後手：false
-      const character_move = tc.spd >= te.spd // 同値はPC有利のためPC先手
+      let character_move = tc.spd >= te.spd // 同値はPC有利のためPC先手
 
       // 戦闘処理
       for(let i=0;i<2;i++){  //先手が0で後手が1　2になったら処理終わり
@@ -85,7 +102,7 @@ class Battle {
             //魔法攻撃詠唱 後手で魔力減少攻撃を受けてMPが0以下になった場合不発　/* UNCERTAIN */
             if(offensive_command == '魔法攻撃' && tc.mp>=1){
               if(tc.mp>=1){
-                const matk_effect = min(Battle.battle_dice(tc.matk.dice),tc.matk.max)
+                const matk_effect = Math.min(Battle.battle_dice(tc.matk.dice),tc.matk.Math.max)
                 tc.atk += matk_effect
                 if (['杖'].includes(tc.weapon.type)){
                   tc.atk += tc.weapon.magic_value
@@ -138,7 +155,7 @@ class Battle {
           // 敵の攻撃
             // 特殊攻撃
             if(te.special_atk_dice>0){
-              const act_special_dice = max(0,te.special_dice - tc.special_reduce - ( te.special_element==tc.armor.element?tc.armor.rank:0))
+              const act_special_dice = Math.max(0,te.special_dice - tc.special_reduce - ( te.special_element==tc.armor.element?tc.armor.rank:0))
               if (act_special_dice>0){
                 const special_effect = Battle.battle_dice(act_special_dice)
                 te.atk += special_effect
@@ -147,7 +164,7 @@ class Battle {
 
             // PCの魔法防御詠唱
             if(defensive_command == '魔法防御' && tc.mp>=1){
-              const mdef_effect = min(Battle.battle_dice(tc.mdef.dice),tc.mdef.max)
+              const mdef_effect = Math.min(Battle.battle_dice(tc.mdef.dice),tc.mdef.Math.max)
               tc.def += mdef_effect
               tc_mp--
               if (tc.mdef.free){
@@ -165,7 +182,7 @@ class Battle {
             }
 
             // ダメージ算出
-            const damage = max(te.atk - tc.def,0)
+            const damage = Math.max(te.atk - tc.def,0)
             if (avo_dice<0){
               const crit_effect = Math.floor(damage * tc.crit_taken)
               damage += crit_effect
@@ -185,7 +202,7 @@ class Battle {
               eob = false
             }
           }
-          character_move= !character_move
+          character_move = !character_move
         }
       }
       // ターン終了時処理
@@ -203,9 +220,9 @@ class Battle {
 
     return {
       result: result, // 勝利：1　引き分け：0　敗北　-1
-      detail: text, /* TODO */
-      hp_used: hp_before - min(c.hp,c.maxhp), // 戦闘中は最大値をこえて回復するが、終了時に最大値まで戻る
-      mp_used: mp_before - min(c.mp,c.maxhp)  // MPが増えることはなさそうだが一応
+      detail: log.result(), /* TODO */
+      hp_used: hp_before - Math.min(c.hp,c.maxhp), // 戦闘中は最大値をこえて回復するが、終了時に最大値まで戻る
+      mp_used: mp_before - Math.min(c.mp,c.maxhp)  // MPが増えることはなさそうだが一応
     }
   }
 
@@ -222,9 +239,15 @@ class Battle {
     }
     for(let i=0;i<loop;i++){
       const r = this.exec()
-      if (r?.resut==1) stat.win++
-      else if (r?.resut==0) stat.draw++
-      else if (r?.resut==-1) stat.lose++
+      if (r?.result===1) {
+        stat.win++
+      }
+      else if (r?.result===0) {
+        stat.draw++
+      }
+      else if (r?.result===-1) {
+        stat.lose++
+      }else{throw {message:'なんか変な結果返ってるよ'}}
       if (r?.detail) stat.texts.push(r.detail)
 
       if(stat.hp_used[r.hp_used]==null) {stat.hp_used[r.hp_used]=0}//初回は作る
@@ -286,19 +309,3 @@ class Command {
   static get DEFENCE_COMMAND(){return ['通常防御','全力防御','回避体勢','魔法防御','逃走']}
 }
 
-class BattleLog{
-  constructor(){
-    this.texts= []
-    this.events=[]
-  }
-
-  /* TODO */  
-  log(text){
-    this.texts.push(text)
-    this.events.push(['log',text])
-  }
-
-  relust(){
-    return this.texts.join("\n")
-  }
-}

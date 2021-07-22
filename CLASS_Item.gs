@@ -4,15 +4,16 @@ class Item extends Clonable {
     this.text = spec_text
     const r = spec_text.match(/^(?<name>〈.+〉)?\s*(?<category>.+)\((?<rank>\d+)\)\/(?<value>\d+)\/(?<proc>\d+)\/(?<magic>\d+)\/(?<elem>.)\/(?<sign>【.+】作。)?(?<type>.+)系。$/u)
     if (r) {
-      this.name = r.name.slice(1, -1)
-      this.category = r.category
-      this.rank = r.rank
-      this.material_value = r.value
-      this.process_value = r.proc
-      this.magic_value = r.magic
-      this.element = r.elem
-      this.signature = r.sign ? r.sign.slice(1, -3) : ''
-      this.type = (['武具', '防具'].includes(this.category)) ? r.type.slice(3) : r.type
+      const rn = r.groups
+      this.name = rn.name.slice(1, -1)
+      this.category = rn.category
+      this.rank = rn.rank
+      this.material_value = rn.value
+      this.process_value = rn.proc
+      this.magic_value = rn.magic
+      this.element = rn.elem
+      this.signature = rn.sign ? rn.sign.slice(1, -3) : ''
+      this.type = (['武具', '防具'].includes(this.category)) ? rn.type.slice(3) : rn.type
     } else {
       this.name = ''
       this.category = ''

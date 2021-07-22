@@ -60,11 +60,11 @@ class BattleCharactor extends Charactor {
     this.armor = armor
 
     // calc
-    this.spd = Math.floor((this.dex()+this.str())/2)+ (['獣人'].includes(this.race)?2:0) + (['武闘家'].includes(this.job)?2:0) + Math.ceil(this.degree/2)+this.weapon.spd + this.armor.spd
-    this.hit = Math.floor(this.dex()/2) + (['獣人'].includes(this.race)?1:0) + (['武闘家','狩人'].includes(this.job)?1:0)              +this.weapon.hit + this.armor.hit
-    this.avo = Math.floor(this.dex()/2) + (['獣人'].includes(this.race)?1:0) + (['武闘家'].includes(this.job)?1:0)              +this.weapon.avo + this.armor.avo
-    this.atk = this.str() + (['戦士'].includes(this.job)?5:0) + weapon.material_value
-    this.def = this.str() + (['戦士','騎士'].includes(this.job)?5:0) + (['槍'].includes(weapon.type)? Math.floor(weapon.process_value/2) :0)
+    this.spd = Math.floor((this.dex+this.str)/2)+ (['獣人'].includes(this.race)?2:0) + (['武闘家'].includes(this.job)?2:0) + Math.ceil(this.degree/2)+this.weapon.spd + this.armor.spd
+    this.hit = Math.floor(this.dex/2) + (['獣人'].includes(this.race)?1:0) + (['武闘家','狩人'].includes(this.job)?1:0)              +this.weapon.hit + this.armor.hit
+    this.avo = Math.floor(this.dex/2) + (['獣人'].includes(this.race)?1:0) + (['武闘家'].includes(this.job)?1:0)              +this.weapon.avo + this.armor.avo
+    this.atk = this.str + (['戦士'].includes(this.job)?5:0) + weapon.material_value
+    this.def = this.str + (['戦士','騎士'].includes(this.job)?5:0) + (['槍'].includes(weapon.type)? Math.floor(weapon.process_value/2) :0)
 
     this.matk = {
       dice:Math.floor(this.mnd/2) + weapon.magic_value + (this.job=='魔術師'?1:0),
@@ -88,9 +88,9 @@ class BattleCharactor extends Charactor {
     this.box_speed = 0
 
     // 属性共鳴
-    this.mode = (ELEMENTS.include(weapon.element) && weapon.element==armor.element) ? weapon.element : '無'
+    this.mode = (ELEMENTS.includes(weapon.element) && weapon.element==armor.element) ? weapon.element : '無'
     const rank = weapon.rank + armor.rank
-    switch(mode){
+    switch(this.mode){
       case '無':
         break;
       case '火':
@@ -145,13 +145,13 @@ class BattleCharactor extends Charactor {
     let full_atk_ref;
     switch(this.weapon.type){
       case 'グリモア':
-        full_atk_ref = this.character.mnd()
+        full_atk_ref = this.mnd
         break;
       case '爆薬':
-        full_atk_ref = this.character.dex()
+        full_atk_ref = this.dex
         break;
       default:
-        full_atk_ref = this.character.str()
+        full_atk_ref = this.str
     }
 
     for (const command of commands) {
@@ -160,13 +160,13 @@ class BattleCharactor extends Charactor {
         case '通常攻撃':
           break;
         case '全力攻撃':　　//全力攻撃は一応、ターン開始時に発動してステ変動もそのときに行われる想定 /* UNCERTAIN */
-          if (this.weapon.weight()=='重' && hp>2){
+          if (this.weapon.weight()=='重' && this.hp>2){
             this.atk += full_atk_ref *2 + Math.floor(this.weapon.process_value/2)
             this.def += full_atk_ref *-1
             this.spd += -1
             this.hp--; this.hp--;
           }
-          else if (hp>1){
+          else if (this.hp>1){
             this.atk += full_atk_ref *2
             this.def += full_atk_ref *-1
             this.spd += -1
