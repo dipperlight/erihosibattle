@@ -7,10 +7,10 @@ class Item extends Clonable {
       const rn = r.groups
       this.name = rn.name.slice(1, -1)
       this.category = rn.category
-      this.rank = rn.rank
-      this.material_value = rn.value
-      this.process_value = rn.proc
-      this.magic_value = rn.magic
+      this.rank = Number(rn.rank)
+      this.material_value = Number(rn.value)
+      this.process_value = Number(rn.proc)
+      this.magic_value = Number(rn.magic)
       this.element = rn.elem
       this.signature = rn.sign ? rn.sign.slice(1, -3) : ''
       this.type = (['武具', '防具'].includes(this.category)) ? rn.type.slice(3) : rn.type
