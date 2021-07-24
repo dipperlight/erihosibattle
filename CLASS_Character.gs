@@ -4,28 +4,23 @@ class Charactor extends Clonable {
     this.race = race
     this.job = job
     this.policy = policy
-    this.degree = degree // 学院生：0　学士：1　公式：2　修士：3
+    this.degree = degree // 学科生：0　学士：1　公式：2　修士：3
+    this.strB = strB
+    this.mndB = mndB
+    this.dexB = dexB
     this.maxhp = Charactor.bonus['base'].hp + Charactor.bonus[race].hp + Charactor.bonus[job].hp + Charactor.bonus[policy].hp
     this.maxmp = Math.floor(Charactor.bonus['base'].mp + Charactor.bonus[race].mp + Charactor.bonus[job].mp + Charactor.bonus[policy].mp)
     this.hp = isNumber(actHP) ? actHP : this.maxhp
     this.mp = isNumber(actMP) ? actMP : this.maxmp
 
-    // calc
     this.str = Charactor.bonus['base'].str + Charactor.bonus[race].str + Charactor.bonus[job].str + Charactor.bonus[policy].str + strB
     this.mnd = Charactor.bonus['base'].mnd + Charactor.bonus[race].mnd + Charactor.bonus[job].mnd + Charactor.bonus[policy].mnd + mndB
     this.dex = Charactor.bonus['base'].dex + Charactor.bonus[race].dex + Charactor.bonus[job].dex + Charactor.bonus[policy].dex + dexB
   }
 
-  static base_param(race, job, policy) {
-    return [
-      Charactor.bonus[race].str + Charactor.bonus[job].str + Charactor.bonus[policy].str,
-      Charactor.bonus[race].mnd + Charactor.bonus[job].mnd + Charactor.bonus[policy].mnd,
-      Charactor.bonus[race].dex + Charactor.bonus[job].dex + Charactor.bonus[policy].dex
-    ]
-  }
   static get bonus() {
     return {
-      'bese': { str: 2, mnd: 2, dex: 2, hp: 16, mp: 3, },
+      'base': { str: 2, mnd: 2, dex: 2, hp: 16, mp: 3, },
       '人間': { str: 1, mnd: 1, dex: 1, hp: 3, mp: 0.5, },
       '獣人': { str: 2, mnd: 0, dex: 0, hp: 11, mp: 0, },
       '魚人': { str: 0, mnd: 2, dex: 0, hp: 0, mp: 1, },
@@ -50,6 +45,14 @@ class Charactor extends Clonable {
       '理論': { str: 0, mnd: 1, dex: 1, hp: 0, mp: 0.5, }
     }
   }
+  static degree_number(degree_text) {
+    switch (degree_text) {
+      case "学科生":return 0
+      case "学士":return 1
+      case "公式":return 2
+      case "修士":return 3
+    }
+  }
 
 }
 
@@ -60,11 +63,22 @@ class BattleCharactor extends Charactor {
     this.armor = armor
 
     // calc
-    this.spd = Math.floor((this.dex + this.str) / 2) + (['獣人'].includes(this.race) ? 2 : 0) + (['武闘家'].includes(this.job) ? 2 : 0) + Math.ceil(this.degree / 2) + this.weapon.spd() + this.armor.spd()
-    this.hit = Math.floor(this.dex / 2) + (['獣人'].includes(this.race) ? 1 : 0) + (['武闘家', '狩人'].includes(this.job) ? 1 : 0) + this.weapon.hit() + this.armor.hit()
-    this.avo = Math.floor(this.dex / 2) + (['獣人'].includes(this.race) ? 1 : 0) + (['武闘家'].includes(this.job) ? 1 : 0) + this.weapon.avo() + this.armor.avo()
-    this.atk = this.str + (['戦士'].includes(this.job) ? 5 : 0) + weapon.material_value
-    this.def = this.str + (['戦士', '騎士'].includes(this.job) ? 5 : 0) + (['槍'].includes(weapon.type) ? Math.floor(weapon.process_value / 2) : 0)
+    this.spd = Math.floor((this.dex + this.str) / 2) + Math.ceil(this.degree / 2)
+      + (['獣人'].includes(this.race) ? 2 : 0) + (['武闘家'].includes(this.job) ? 2 : 0)
+      + this.weapon.spd() + this.armor.spd()
+    this.hit = Math.floor(this.dex / 2)
+      + (['獣人'].includes(this.race) ? 1 : 0) + (['武闘家', '狩人'].includes(this.job) ? 1 : 0)
+      + this.weapon.hit() + this.armor.hit()
+    this.avo = Math.floor(this.dex / 2)
+      + (['獣人'].includes(this.race) ? 1 : 0) + (['武闘家'].includes(this.job) ? 1 : 0)
+      + this.weapon.avo() + this.armor.avo()
+    this.atk = this.str
+      + (['戦士'].includes(this.job) ? 5 : 0)
+      + weapon.material_value
+    this.def = this.str
+      + (['戦士', '騎士'].includes(this.job) ? 5 : 0)
+      + (['槍'].includes(weapon.type) ? Math.floor(weapon.process_value / 2) : 0)
+      + armor.material_value
 
     this.matk = {
       dice: Math.floor(this.mnd / 2) + weapon.magic_value + (this.job == '魔術師' ? 1 : 0),
@@ -85,7 +99,7 @@ class BattleCharactor extends Charactor {
     this.curse = 0
     this.ghost_effect = 0
     this.box_effect = 0
-    this.box_speed = 0
+    this.box_spd = 0
 
     // 属性共鳴
     this.mode = (ELEMENTS.includes(weapon.element) && weapon.element == armor.element) ? weapon.element : '無'

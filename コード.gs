@@ -1,12 +1,15 @@
-const CALC_SHEET_NAME = '処理用シート';
-const ENEMY_CELL_ROW = 2,
-  ENEMY_CELL_COL = 7,
-  BATTLE_SHEET_NAME = '勝率計算';
-
-const MAX_ENEMY_ROW = 30,
+const CALC_SHEET_NAME = '処理用シート',
+  ENEMY_CELL_ROW = 25,
+  ENEMY_CELL_COL = 2,
+  BATTLE_SHEET_NAME = '勝率計算',
+  ENEMY_TARGET_ROW = 3,
+  ENEMY_TARGET_COL = 14,
+  MAX_ENEMY_ROW = 30,
   ENEMY_COL_SIZE = 22,
   ENEMYLIST_POS_ROW = 1,
-  ENEMYLIST_POS_COL = 1;
+  ENEMYLIST_POS_COL = 1,
+  ENEMY_OUTPUT_COL_SIZE = 15,
+  RESULT_OUTPUT_COL_SIZE=8
 
 var update_battle_group = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -17,46 +20,127 @@ var update_battle_group = () => {
   const value = cell.getValue();
   // Logger.log("**"+sheet.getName()+" , "+rangeRow+" , "+rangeCol+", "+value)
 
-  if (sheet.getName() == BATTLE_SHEET_NAME && (rangeRow == ENEMY_CELL_ROW && rangeCol == ENEMY_CELL_COL)) {
+  if (sheet.getName() == BATTLE_SHEET_NAME && rangeRow == ENEMY_CELL_ROW && rangeCol == ENEMY_CELL_COL) {
     const enemies = ss.getSheetByName(CALC_SHEET_NAME).getRange(ENEMYLIST_POS_ROW, ENEMYLIST_POS_COL, MAX_ENEMY_ROW, ENEMY_COL_SIZE).getValues();
-    // Logger.log(JSON.stringify(enemies))
-    let enemy_view = new Array(MAX_ENEMY_ROW).fill(new Array(ENEMY_COL_SIZE).fill(''));
+    Logger.log(JSON.stringify(enemies))
+    let enemy_view = new Array(MAX_ENEMY_ROW);
     for (let i = 0; i < MAX_ENEMY_ROW; i++) {
-      enemy_view[i] = (function (enemy) {
-        return Boolean(enemy.name) ? [
-          enemy.name,
-          enemy.area,
-          enemy.rank,
-          range(enemy.min_hp, enemy.max_hp),
-          range(enemy.min_atk, enemy.max_atk),
-          range(enemy.min_def, enemy.max_def),
-          range(enemy.min_hit, enemy.max_hit),
-          range(enemy.min_avo, enemy.max_avo),
-          range(enemy.min_spd, enemy.max_spd),
-          enemy.race,
-          enemy.magic_resist == 0 ? '-' : enemy.magic_resist,
-          enemy.magic_reaction ? '有' : '-',
-          enemy.magic_reduce == 0 ? '-' : enemy.magic_reduce,
-          enemy.week_element,
-          Boolean(enemy.special_element) ? enemy.special_element + enemy.special_dice : '-'
-        ] : new Array(15).fill('-');
-      }(new Enemy(...enemies[i])))
+      const enemy = enemies[i]
+      enemy_view[i] =
+        enemy[0] ? [
+          enemy[0],
+          enemy[1],
+          enemy[2],
+          ranged_text(enemy[3], enemy[4], 3),
+          ranged_text(enemy[5], enemy[6], 3),
+          ranged_text(enemy[7], enemy[8], 3),
+          ranged_text(enemy[9], enemy[10], 2),
+          ranged_text(enemy[11], enemy[12], 2),
+          ranged_text(enemy[13], enemy[14], 2),
+          enemy[15],
+          enemy[16] || '-',
+          enemy[17] ? '有' : '-',
+          enemy[18] || '-',
+          enemy[19],
+          enemy[20] ? enemy[20] + enemy[21] : '-'
+        ] : new Array(ENEMY_OUTPUT_COL_SIZE).fill('-');
     }
-    // Logger.log(JSON.stringify(enemy_view))
-    sheet.getRange(6, 6, enemy_view.length, enemy_view[0].length).setValues(enemy_view)
+    Logger.log(JSON.stringify(enemy_view))
+    sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL, MAX_ENEMY_ROW, ENEMY_OUTPUT_COL_SIZE).setValues(enemy_view)
+    sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(
+      new Array(MAX_ENEMY_ROW).fill(new Array(RESULT_OUTPUT_COL_SIZE).fill('-'))
+    )
+    simulate_battle()
   }
   return
 }
 
 var simulate_battle = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getActiveSheet();
-  const battle = new Battle(
-    new BattleCharactor(),
-    new Enemy(),
-    new Command(),
-    area
-  )
-  const stat = battle.run()
-  /* TODO */
+  const sheet = ss.getSheetByName(BATTLE_SHEET_NAME)
+
+  // キャラクター
+  const arms = sheet.getRange('B10:B11').getValues().flat().map(arm => new Item(arm))
+  const build = sheet.getRange('C15:C18').getValues().flat()
+  build[3] = Charactor.degree_number(build[3])
+  const bonus = sheet.getRange('H2:H4').getValues().flat()
+  const act = sheet.getRange('L2:L3').getValues().flat()
+
+  const battleCharactor = new BattleCharactor(...arms, ...build, ...bonus, ...act)
+
+  // コマンド
+  const command = new Command(sheet.getRange('C5:E7').getValues().map(row=>row.filter(val=>val)))
+
+  // 地形
+  const sanctuary = sheet.getRange('L6').getValue()
+  const underwater = sheet.getRange('L7').getValue()
+
+  // 敵配列
+  const enemys = sheet.getRange('N3:AB32').getValues().map(row =>{
+    if (row[0]&&row[0]!='-'){
+      return new Enemy(
+        row[0],
+        row[1],
+        row[2],
+        pop_max(row[3]),
+        pop_max(row[4]),
+        pop_max(row[5]),
+        pop_max(row[6]),
+        pop_max(row[7]),
+        pop_max(row[8]),
+        row[9],
+        row[10],
+        typeof (row[11]) === "boolean" ? row[11] : ['有', '○', '◯', 1].includes(row[11]),
+        row[12],
+        row[13],
+        row[14].match(/^([^\d]+)(\d+)$/)?.[1] ?? '？',
+        row[14].match(/^([^\d]+)(\d+)$/)?.[2] ?? 0
+      )
+    }else{
+      return null
+    }
+  })
+
+  let results = new Array(MAX_ENEMY_ROW)
+  for (let i = 0; i < MAX_ENEMY_ROW; i++) {
+    if (enemys[i]){
+
+      const battle = new Battle(
+        battleCharactor,
+        enemys[i],
+        command,
+        sanctuary,
+        underwater
+      )
+
+      // シミュ実行
+      const stat = battle.run(sheet.getRange('H25').getValue())
+
+      // 消費HP分類 0,1~開始時HP(生存),-1~-10(ギリ死),-11~（大敗北）
+      let lose_hp = new Array(4).fill(0)
+      Object.keys(stat.hp_used).forEach(used => {
+        switch (true) {
+          case used == 0: lose_hp[0]+=stat.hp_used[used]; break;
+          case used <= battleCharactor.hp: lose_hp[1]+=stat.hp_used[used]; break;
+          case used <= battleCharactor.hp + 10: lose_hp[2]+=stat.hp_used[used]; break;
+          default: lose_hp[3]+=stat.hp_used[used]
+        }
+      })
+
+      // 結果出力
+      results[i] = [
+        stat.win,
+        stat.draw,
+        stat.lose,
+        ...lose_hp,
+        stat.texts[0]??''
+        /* TODO */
+      ]
+    }else{
+      results[i] = new Array(8).fill('-')
+    }
+
+  }
+
+  sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(results)
 }

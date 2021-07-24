@@ -1,37 +1,25 @@
 
-var debug = () => {
-  const dummy_battleCharactor = new BattleCharactor(new Item('〈風刃：サバンナ〉武具(7)/38/13/12/風/【木天蓼】作。武具：弓矢系。'), new Item('〈魔動式カラクリ鳳仙花〉防具(7)/20/13/12/辛/【木天蓼】作。防具：護符系。'), '魚人', '武闘家', '技巧', 3)
-  const dummy_enemy = new Enemy('ダミー', '草原', 2, 10, 10, 10, 10, 10, 10, '器物', 10, false, 0, '風', '地', 2)
-  const dummy_command = new Command('全力攻撃', '専守防衛', '魔法攻撃', '通常防御', '全力防御', '逃走')
-  const dummy_area = '草原'
-
-  dummy_battle = new Battle(dummy_battleCharactor, dummy_enemy, dummy_command, dummy_area)
-
-  let ret = dummy_battle.run(1000)
-  return
-}
-
 class Battle {
-  constructor(battle_charactor, enemy, command, area) {
+  constructor(battle_charactor, enemy, command, sanctuary, underwater) {
     this.character = battle_charactor.clone()
     this.enemy = enemy.clone()
     this.command = command
-    this.area = area
+    this.sanctuary = sanctuary
+    this.underwater = underwater
   }
 
   exec(detail = false) {
     let turn = 1
-    let text = ''
     let eob = true // 戦闘終了フラグ falseで戦闘終了
     let result = 0 // 1:勝利 0:引き分け -1:敗北
-    const log = new BattleLog()
+    const log = new BattleLog(detail)
     const c = this.character.clone()
     const e = this.enemy.clone()
     const hp_before = c.hp
     const mp_before = c.mp
 
     //ログテスト
-    log.text('test,戦闘開始')
+    log.add('test','戦闘開始')
 
     // 戦闘開始前処理 ***********************
     // 魔力耐性
@@ -44,13 +32,17 @@ class Battle {
     }
 
     // 特殊地形(聖域・原始林)処理
-    switch (this.area) {
-      case '聖域':
-      /* FALLTHROUGH */
-      case '原始林':
-        c.matk.dice = Math.float(c.matk.dice / 4)
-        c.mdef.dice = Math.float(c.mdef.dice / 4)
-        break;
+    if (this.sanctuary) {
+      c.matk.dice = Math.trunc(c.matk.dice / 4)
+      c.mdef.dice = Math.trunc(c.mdef.dice / 4)
+    }
+
+    // 水中処理
+    if (this.underwater) {
+      const water = c.race=='魚人'? 2 : -2
+      c.spd += water
+      c.hit += water
+      c.avo += water
     }
 
     // 種族特効
@@ -102,7 +94,7 @@ class Battle {
             //魔法攻撃詠唱 後手で魔力減少攻撃を受けてMPが0以下になった場合不発　/* UNCERTAIN */
             if (offensive_command == '魔法攻撃' && tc.mp >= 1) {
               if (tc.mp >= 1) {
-                const matk_effect = Math.min(Battle.battle_dice(tc.matk.dice), tc.matk.Math.max)
+                const matk_effect = Math.min(Battle.battle_dice(tc.matk.dice), tc.matk.max)
                 tc.atk += matk_effect
                 if (['杖'].includes(tc.weapon.type)) {
                   tc.atk += tc.weapon.magic_value
@@ -154,7 +146,7 @@ class Battle {
           if (eob) {
             // 敵の攻撃
             // 特殊攻撃
-            if (te.special_atk_dice > 0) {
+            if (te.special_dice > 0) {
               const act_special_dice = Math.max(0, te.special_dice - tc.special_reduce - (te.special_element == tc.armor.element ? tc.armor.rank : 0))
               if (act_special_dice > 0) {
                 const special_effect = Battle.battle_dice(act_special_dice)
@@ -164,9 +156,9 @@ class Battle {
 
             // PCの魔法防御詠唱
             if (defensive_command == '魔法防御' && tc.mp >= 1) {
-              const mdef_effect = Math.min(Battle.battle_dice(tc.mdef.dice), tc.mdef.Math.max)
+              const mdef_effect = Math.min(Battle.battle_dice(tc.mdef.dice), tc.mdef.max)
               tc.def += mdef_effect
-              tc_mp--
+              tc.mp--
               if (tc.mdef.free) {
                 tc.mp++
               }
@@ -238,7 +230,7 @@ class Battle {
       mp_used: {}
     }
     for (let i = 0; i < loop; i++) {
-      const r = this.exec()
+      const r = this.exec(!i)
       if (r?.result === 1) {
         stat.win++
       }
@@ -272,13 +264,16 @@ class Battle {
 
 
 class Command {
-  constructor(off1, off2, off3, def1, def2, def3) {
-    this.offense1 = off1
-    this.offense2 = off2
-    this.offense3 = off3
-    this.defense1 = def1
-    this.defense2 = def2
-    this.defense3 = def3
+  /**
+   * commands [[off1,def1],[off2,def2],[off3,def3]]
+   */
+  constructor(commands) {
+    this.offense1 = commands[0][0]
+    this.offense2 = commands[1][0]
+    this.offense3 = commands[2][0]
+    this.defense1 = commands[0][1]
+    this.defense2 = commands[1][1]
+    this.defense3 = commands[2][1]
   }
 
   offense(turn = null) {
