@@ -11,6 +11,7 @@ const CALC_SHEET_NAME = '処理用シート',
   ENEMY_OUTPUT_COL_SIZE = 15,
   RESULT_OUTPUT_COL_SIZE=8
 
+
 var update_battle_group = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getActiveSheet();
@@ -22,7 +23,7 @@ var update_battle_group = () => {
 
   if (sheet.getName() == BATTLE_SHEET_NAME && rangeRow == ENEMY_CELL_ROW && rangeCol == ENEMY_CELL_COL) {
     const enemies = ss.getSheetByName(CALC_SHEET_NAME).getRange(ENEMYLIST_POS_ROW, ENEMYLIST_POS_COL, MAX_ENEMY_ROW, ENEMY_COL_SIZE).getValues();
-    Logger.log(JSON.stringify(enemies))
+    // Logger.log(JSON.stringify(enemies))
     let enemy_view = new Array(MAX_ENEMY_ROW);
     for (let i = 0; i < MAX_ENEMY_ROW; i++) {
       const enemy = enemies[i]
@@ -45,7 +46,7 @@ var update_battle_group = () => {
           enemy[20] ? enemy[20] + enemy[21] : '-'
         ] : new Array(ENEMY_OUTPUT_COL_SIZE).fill('-');
     }
-    Logger.log(JSON.stringify(enemy_view))
+    // Logger.log(JSON.stringify(enemy_view))
     sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL, MAX_ENEMY_ROW, ENEMY_OUTPUT_COL_SIZE).setValues(enemy_view)
     sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(
       new Array(MAX_ENEMY_ROW).fill(new Array(RESULT_OUTPUT_COL_SIZE).fill('-'))
@@ -134,7 +135,6 @@ var simulate_battle = () => {
         stat.lose,
         ...lose_hp,
         stat.texts[0]??''
-        /* TODO */
       ]
     }else{
       results[i] = new Array(8).fill('-')

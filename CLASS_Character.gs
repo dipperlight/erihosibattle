@@ -148,11 +148,11 @@ class BattleCharactor extends Charactor {
         this.crit_multi += 0.4
         break;
       default:
-        throw { message: '知らない属性共鳴', element: mode }
+        throw { message: '知らない属性共鳴', value: mode }
     }
   }
   static get clone_properties() {
-    return ['weapon', 'armor']
+    return ['weapon', 'armor','matk','mdef']
   }
 
   command(...commands) {
@@ -217,7 +217,7 @@ class BattleCharactor extends Charactor {
         case '逃走':
           break;
         default:
-          throw { message: '知らない戦闘コマンド', command: command }
+          throw { message: '知らない戦闘コマンド', value: command }
       }
     }
   }

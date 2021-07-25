@@ -23,7 +23,7 @@ class Clonable {
   clone() {
     const clone = Object.create(this)
     for (const prop of this.constructor.clone_properties) {
-      clone[prop] = this[prop].clone()
+      clone[prop] = this[prop].clone?.()??Object.create(this[prop])
     }
     return clone
   }

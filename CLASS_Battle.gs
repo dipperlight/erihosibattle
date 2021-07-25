@@ -1,4 +1,3 @@
-
 class Battle {
   constructor(battle_charactor, enemy, command, sanctuary, underwater) {
     this.character = battle_charactor.clone()
@@ -12,24 +11,47 @@ class Battle {
     let turn = 1
     let eob = true // 戦闘終了フラグ falseで戦闘終了
     let result = 0 // 1:勝利 0:引き分け -1:敗北
-    const log = new BattleLog(detail)
+    const log = ERIHOSHI_LOG
+    log.clear('battle')    // 既存の　battle　グループをクリア
+    log.set_group('battle') // ロググループを　battle に設定
+    log.set_level(detail?INFO:VERBOSE) // ログレベルを設定　detail? true:1 false:2
     const c = this.character.clone()
     const e = this.enemy.clone()
     const hp_before = c.hp
     const mp_before = c.mp
 
-    //ログテスト
-    log.add('test','戦闘開始')
+    //戦闘開始
+log.add('戦闘開始時','戦闘開始')
 
     // 戦闘開始前処理 ***********************
+    // 魔法最大値
+    //敵ランク分
+      c.matk.max -= e.rank * 5
+      c.mdef.max -= e.rank * 5
+
     // 魔力耐性
-    c.matk.max -= (e.rank * 5 + e.magic_resist)
-    c.mdef.max -= (e.rank * 5 + e.magic_resist)
+log.log('魔力耐性',`魔力耐性：${e.magic_resist}`,'battle',DEBUG)
+    if (e.magic_resist) {
+      c.matk.max -= e.magic_resist
+      c.mdef.max -= e.magic_resist
+    }
+    // 0未満にはならない
+    c.matk.max = c.matk.max<0? 0: c.matk.max
+    c.mdef.max = c.mdef.max<0? 0: c.mdef.max
+log.add('魔力最大値',`魔攻最大値:${c.matk.max} , 魔防最大値:${c.mdef.max} `)
 
     // 魔力反応処理
+log.log('魔力耐性',`魔力反応：${e.magic_reaction}`,'battle',DEBUG)
     if (e.magic_reaction) {
-      /* TODO */
+      const mr_atk = c.armor.magic_value*e.rank
+      const mr_def = c.weapon.magic_value*e.rank
+      c.atk = mr_atk>c.atk? 0 : c.atk - mr_atk
+      c.def = mr_def>c.def? 0 : c.def - mr_def    
+log.add('魔力耐性',`敵の魔力反応によって、攻撃力が${mr_atk} ,、防御力が:${mr_def}減少 `)
     }
+
+    ////てすとてすと
+    //tesutesu
 
     // 特殊地形(聖域・原始林)処理
     if (this.sanctuary) {
@@ -212,7 +234,7 @@ class Battle {
 
     return {
       result: result, // 勝利：1　引き分け：0　敗北　-1
-      detail: log.result(), /* TODO */
+      detail: log.result('battle'),
       hp_used: hp_before - Math.min(c.hp, c.maxhp), // 戦闘中は最大値をこえて回復するが、終了時に最大値まで戻る
       mp_used: mp_before - Math.min(c.mp, c.maxhp)  // MPが増えることはなさそうだが一応
     }
@@ -239,7 +261,7 @@ class Battle {
       }
       else if (r?.result === -1) {
         stat.lose++
-      } else { throw { message: 'なんか変な結果返ってるよ' } }
+      } else { throw { message: 'なんか変な結果返ってるよ',value:r?.result } }
       if (r?.detail) stat.texts.push(r.detail)
 
       if (stat.hp_used[r.hp_used] == null) { stat.hp_used[r.hp_used] = 0 }//初回は作る
@@ -281,7 +303,7 @@ class Command {
     if ([1, 2, 3].includes(turn)) {
       return eval(`this.offense${turn}`)
     } else {
-      throw { message: 'そんなターンはないよ' }
+      throw { message: 'そんなターンはないよ',value:turn }
     }
   }
   defense(turn = null) {
@@ -289,14 +311,14 @@ class Command {
     if ([1, 2, 3].includes(turn)) {
       return eval(`this.defense${turn}`)
     } else {
-      throw { message: 'そんなターンはないよ' }
+      throw { message: 'そんなターンはないよ',value:turn }
     }
   }
   turn(turn) {
     if ([1, 2, 3].includes(turn)) {
       return eval(`[this.offense${turn},this.defense${turn}]`)
     } else {
-      throw { message: 'そんなターンはないよ' }
+      throw { message: 'そんなターンはないよ',value:turn }
     }
   }
 
