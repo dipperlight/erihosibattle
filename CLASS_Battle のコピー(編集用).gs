@@ -1,4 +1,4 @@
-class Battle {
+class Battle_ {
   constructor(battle_charactor, enemy, command, sanctuary, underwater) {
     this.character = battle_charactor.clone()
     this.enemy = enemy.clone()
@@ -68,21 +68,17 @@ log.add('魔力耐性',`敵の魔力耐性！攻撃力が${mr_atk}、防御力�
     // 種族特効
     switch (e.race) {
       case '死霊':
-        if (c.weapon.element=='塩'){
         c.atk += c.ghost_effect
         c.def += c.ghost_effect
 log.add('属性共鳴',`セイントモード！攻撃力が${c.ghost_effect}、防御力が${c.ghost_effect}増加！`)
-        }
         break;
       case '器物':
-        if (c.weapon.element=='酸'){
         c.atk += c.box_effect
         c.spd += c.box_spd
 log.add('属性共鳴',`デストロイヤーモード！攻撃力が${c.box_effect}、速度が${c.box_spd}増加！`)
-        }
         break;
     }
-log.add('区切り線',`---------------`) 
+
     do {
       // ターン開始時処理 **********************
       const tc = c.clone()  //ターン中にステが変化するためクローン
@@ -241,8 +237,8 @@ log.add('魔法防御',`詠唱！`)
 log.add('魔法防御',dice.text())
 log.add('魔法防御',`防御力が${mdef_effect}上昇！（${tc.def}、MP${tc.mp}）`) 
               if (tc.mdef.free) {
-                tc.mp++
 log.add('魔法防御',`${tc.armor.type}効果！MPが1回復！（MP${(tc.mp)}）`)
+                tc.mp++
               }
             }else{
 log.add('魔法防御',`MPが足りない為、失敗！`) 
@@ -301,7 +297,6 @@ log.add('逃走',`${tc.name}は逃げ出した！`)
       c.mp = tc.mp
       e.hp = te.hp
       turn++
-log.add('区切り線',`---------------`) 
     } while (eob && turn <= 3)
 
 
@@ -349,7 +344,7 @@ log.add('結果',`${result==1?'勝利':result==0?'引き分け':'敗北'}！`)
 }
 
 
-class Command {
+class Command_ {
   /**
    * commands [[off1,def1],[off2,def2],[off3,def3]]
    */

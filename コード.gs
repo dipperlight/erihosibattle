@@ -11,6 +11,7 @@ const CALC_SHEET_NAME = '処理用シート',
   ENEMY_OUTPUT_COL_SIZE = 15,
   RESULT_OUTPUT_COL_SIZE=8
 
+// いみはないてすと
 
 var update_battle_group = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -61,13 +62,14 @@ var simulate_battle = () => {
   const sheet = ss.getSheetByName(BATTLE_SHEET_NAME)
 
   // キャラクター
+  const name = sheet.getRange('C2').getValue()
   const arms = sheet.getRange('B10:B11').getValues().flat().map(arm => new Item(arm))
   const build = sheet.getRange('C15:C18').getValues().flat()
   build[3] = Charactor.degree_number(build[3])
   const bonus = sheet.getRange('H2:H4').getValues().flat()
   const act = sheet.getRange('L2:L3').getValues().flat()
 
-  const battleCharactor = new BattleCharactor(...arms, ...build, ...bonus, ...act)
+  const battleCharactor = new BattleCharactor(...arms, name, ...build, ...bonus, ...act)
 
   // コマンド
   const command = new Command(sheet.getRange('C5:E7').getValues().map(row=>row.filter(val=>val)))

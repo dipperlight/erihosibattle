@@ -1,21 +1,22 @@
 class Charactor extends Clonable {
-  constructor(race, job, policy, degree, strB = 0, mndB = 0, dexB = 0, actHP = null, actMP = null) {
+  constructor(name,race, job, policy, degree, strB = 0, mndB = 0, dexB = 0, actHP = null, actMP = null) {
     super()
+    this.name = name
     this.race = race
     this.job = job
     this.policy = policy
     this.degree = degree // 学科生：0　学士：1　公式：2　修士：3
-    this.strB = strB
-    this.mndB = mndB
-    this.dexB = dexB
+    this.strB = strB||0
+    this.mndB = mndB||0
+    this.dexB = dexB||0
     this.maxhp = Charactor.bonus['base'].hp + Charactor.bonus[race].hp + Charactor.bonus[job].hp + Charactor.bonus[policy].hp
     this.maxmp = Math.floor(Charactor.bonus['base'].mp + Charactor.bonus[race].mp + Charactor.bonus[job].mp + Charactor.bonus[policy].mp)
     this.hp = isNumber(actHP) ? actHP : this.maxhp
     this.mp = isNumber(actMP) ? actMP : this.maxmp
 
-    this.str = Charactor.bonus['base'].str + Charactor.bonus[race].str + Charactor.bonus[job].str + Charactor.bonus[policy].str + strB
-    this.mnd = Charactor.bonus['base'].mnd + Charactor.bonus[race].mnd + Charactor.bonus[job].mnd + Charactor.bonus[policy].mnd + mndB
-    this.dex = Charactor.bonus['base'].dex + Charactor.bonus[race].dex + Charactor.bonus[job].dex + Charactor.bonus[policy].dex + dexB
+    this.str = Charactor.bonus['base'].str + Charactor.bonus[race].str + Charactor.bonus[job].str + Charactor.bonus[policy].str + this.strB
+    this.mnd = Charactor.bonus['base'].mnd + Charactor.bonus[race].mnd + Charactor.bonus[job].mnd + Charactor.bonus[policy].mnd + this.mndB
+    this.dex = Charactor.bonus['base'].dex + Charactor.bonus[race].dex + Charactor.bonus[job].dex + Charactor.bonus[policy].dex + this.dexB
   }
 
   static get bonus() {
