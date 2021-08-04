@@ -14,46 +14,38 @@ const CALC_SHEET_NAME = '処理用シート',
 
 var update_battle_group = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getActiveSheet();
-  const cell = sheet.getActiveCell();
-  const rangeRow = cell.getRow();
-  const rangeCol = cell.getColumn();
-  const value = cell.getValue();
-  // Logger.log("**"+sheet.getName()+" , "+rangeRow+" , "+rangeCol+", "+value)
+  const enemies = ss.getSheetByName(CALC_SHEET_NAME).getRange(ENEMYLIST_POS_ROW, ENEMYLIST_POS_COL, MAX_ENEMY_ROW, ENEMY_COL_SIZE).getValues();
+  // Logger.log(JSON.stringify(enemies))
 
-  if (sheet.getName() == BATTLE_SHEET_NAME && rangeRow == ENEMY_CELL_ROW && rangeCol == ENEMY_CELL_COL) {
-    const enemies = ss.getSheetByName(CALC_SHEET_NAME).getRange(ENEMYLIST_POS_ROW, ENEMYLIST_POS_COL, MAX_ENEMY_ROW, ENEMY_COL_SIZE).getValues();
-    // Logger.log(JSON.stringify(enemies))
-    let enemy_view = new Array(MAX_ENEMY_ROW);
-    for (let i = 0; i < MAX_ENEMY_ROW; i++) {
-      const enemy = enemies[i]
-      enemy_view[i] =
-        enemy[0] ? [
-          enemy[0],
-          enemy[1],
-          enemy[2],
-          ranged_text(enemy[3], enemy[4], 3),
-          ranged_text(enemy[5], enemy[6], 3),
-          ranged_text(enemy[7], enemy[8], 3),
-          ranged_text(enemy[9], enemy[10], 2),
-          ranged_text(enemy[11], enemy[12], 2),
-          ranged_text(enemy[13], enemy[14], 2),
-          enemy[15],
-          enemy[16] || '-',
-          enemy[17] ? '有' : '-',
-          enemy[18] || '-',
-          enemy[19],
-          enemy[20] ? enemy[20] + enemy[21] : '-'
-        ] : new Array(ENEMY_OUTPUT_COL_SIZE).fill('-');
-    }
-    // Logger.log(JSON.stringify(enemy_view))
-    sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL, MAX_ENEMY_ROW, ENEMY_OUTPUT_COL_SIZE).setValues(enemy_view)
-    sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(
-      new Array(MAX_ENEMY_ROW).fill(new Array(RESULT_OUTPUT_COL_SIZE).fill('-'))
-    )
-    simulate_battle()
+  let enemy_view = new Array(MAX_ENEMY_ROW);
+  for (let i = 0; i < MAX_ENEMY_ROW; i++) {
+    const enemy = enemies[i]
+    enemy_view[i] =
+      enemy[0] ? [
+        enemy[0],
+        enemy[1],
+        enemy[2],
+        ranged_text(enemy[3], enemy[4], 3),
+        ranged_text(enemy[5], enemy[6], 3),
+        ranged_text(enemy[7], enemy[8], 3),
+        ranged_text(enemy[9], enemy[10], 2),
+        ranged_text(enemy[11], enemy[12], 2),
+        ranged_text(enemy[13], enemy[14], 2),
+        enemy[15],
+        enemy[16] || '-',
+        enemy[17] ? '有' : '-',
+        enemy[18] || '-',
+        enemy[19],
+        enemy[20] ? enemy[20] + enemy[21] : '-'
+      ] : new Array(ENEMY_OUTPUT_COL_SIZE).fill('-');
   }
-  return
+  // Logger.log(JSON.stringify(enemy_view))
+
+  const sheet = ss.getSheetByName(BATTLE_SHEET_NAME);
+  sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL, MAX_ENEMY_ROW, ENEMY_OUTPUT_COL_SIZE).setValues(enemy_view)
+  sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(
+    new Array(MAX_ENEMY_ROW).fill(new Array(RESULT_OUTPUT_COL_SIZE).fill('-'))
+  )
 }
 
 var simulate_battle = () => {
