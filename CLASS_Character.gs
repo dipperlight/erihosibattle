@@ -146,7 +146,7 @@ class BattleCharactor extends Charactor {
         break;
       case '毒':
         this.avo += Math.floor(rank / 5);
-        this.crit_multi += 0.4
+        this.crit_multi = Math.trunc((this.crit_multi+0.4)*10)/10
         break;
       default:
         throw { message: '知らない属性共鳴', value: mode }

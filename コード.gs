@@ -9,9 +9,8 @@ const CALC_SHEET_NAME = '処理用シート',
   ENEMYLIST_POS_ROW = 1,
   ENEMYLIST_POS_COL = 1,
   ENEMY_OUTPUT_COL_SIZE = 15,
-  RESULT_OUTPUT_COL_SIZE=8
-
-// いみはないてすと
+  RESULT_OUTPUT_COL_SIZE=7,
+  LOG_SHEET_NAME='戦闘ログ'
 
 var update_battle_group = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -60,6 +59,7 @@ var update_battle_group = () => {
 var simulate_battle = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(BATTLE_SHEET_NAME)
+  const sheet_log = ss.getSheetByName(LOG_SHEET_NAME)
 
   // キャラクター
   const name = sheet.getRange('C2').getValue()
@@ -104,7 +104,10 @@ var simulate_battle = () => {
     }
   })
 
+  const time = sheet.getRange('H25').getValue()||10
+  const log = 10
   let results = new Array(MAX_ENEMY_ROW)
+  let logs = new Array(MAX_ENEMY_ROW)
   for (let i = 0; i < MAX_ENEMY_ROW; i++) {
     if (enemys[i]){
 
@@ -117,7 +120,7 @@ var simulate_battle = () => {
       )
 
       // シミュ実行
-      const stat = battle.run(sheet.getRange('H25').getValue())
+      const stat = battle.run(time,log)
 
       // 消費HP分類 0,1~開始時HP(生存),-1~-10(ギリ死),-11~（大敗北）
       let lose_hp = new Array(4).fill(0)
@@ -125,7 +128,7 @@ var simulate_battle = () => {
         switch (true) {
           case used == 0: lose_hp[0]+=stat.hp_used[used]; break;
           case used <= battleCharactor.hp: lose_hp[1]+=stat.hp_used[used]; break;
-          case used <= battleCharactor.hp + 10: lose_hp[2]+=stat.hp_used[used]; break;
+          case used <= battleCharactor.hp + 20: lose_hp[2]+=stat.hp_used[used]; break;
           default: lose_hp[3]+=stat.hp_used[used]
         }
       })
@@ -135,14 +138,18 @@ var simulate_battle = () => {
         stat.win,
         stat.draw,
         stat.lose,
-        ...lose_hp,
-        stat.texts[0]??''
-      ]
+        ...lose_hp
+        ]
+      logs[i] = stat.texts.map((log,idx)=>'〈'+ (idx+1) +'〉 '+ log.substr(log.lastIndexOf("\n")+1) +'\n'+log+'\n**********\n')
     }else{
-      results[i] = new Array(8).fill('-')
+      results[i] = new Array(RESULT_OUTPUT_COL_SIZE).fill('-')
+      
+      logs[i] = new Array(log)
     }
 
   }
 
   sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(results)
+  sheet_log.getRange(2, 2, MAX_ENEMY_ROW, log).setValues(logs)
+
 }

@@ -15,14 +15,14 @@ class Battle {
     const log = ERIHOSHI_LOG
     log.clear('battle')    // 既存の　battle　グループをクリア
     log.set_group('battle') // ロググループを　battle に設定
-    log.set_level(detail?INFO:VERBOSE) // ログレベルを設定　detail? true:1 false:2
+    log.set_level(detail?1:2) // ログレベルを設定　detail? true:1 false:2
+
     const c = this.character.clone()
     const e = this.enemy.clone()
     const hp_before = c.hp
     const mp_before = c.mp
 
     //戦闘開始
-log.add('戦闘開始時','戦闘開始')
 
     // 戦闘開始前処理 ***********************
     // 魔法最大値
@@ -48,7 +48,7 @@ log.log('魔力耐性',`魔力反応：${e.magic_reaction}`,'battle',DEBUG)
       const mr_def = c.weapon.magic_value*e.rank
       c.atk = mr_atk>c.atk? 0 : c.atk - mr_atk
       c.def = mr_def>c.def? 0 : c.def - mr_def    
-log.add('魔力耐性',`敵の魔力耐性！攻撃力が${mr_atk}、防御力が:${mr_def}減少！`)
+log.add('魔力耐性',`敵の魔力耐性！攻撃力が${mr_atk}、防御力が${mr_def}減少！`)
     }
 
     // 特殊地形(聖域・原始林)処理
@@ -57,6 +57,7 @@ log.add('魔力耐性',`敵の魔力耐性！攻撃力が${mr_atk}、防御力�
       c.mdef.dice = Math.trunc(c.mdef.dice / 4)
     }
 
+        Logger.log("PC" + c.spd +"   敵"+ e.spd + "  " + this.underwater)
     // 水中処理
     if (this.underwater) {
       const water = c.race=='魚人'? 2 : -2
@@ -82,18 +83,24 @@ log.add('属性共鳴',`デストロイヤーモード！攻撃力が${c.box_eff
         }
         break;
     }
+
+log.add('戦闘開始時','戦闘開始')
 log.add('区切り線',`---------------`) 
     do {
+//log.log('ステ表示',`PC　攻撃：${c.atk},防御:${c.def}  敵　攻撃：${e.atk},防御:${e.def}`,'battle',DEBUG)
       // ターン開始時処理 **********************
       const tc = c.clone()  //ターン中にステが変化するためクローン
 
 log.add('ターン開始時',`${turn}ターン！`)  
 
-      //辛セット効果　マイナスにまでなるかは知らない　とりあえず下限設定はなし　/* UNCERTAIN */
+      //辛セット効果　最低0でマイナスにはならない
       if (tc.curse > 0) { 
-        e.atk -= tc.curse
-        e.def -= tc.curse
-log.add('属性共鳴',`カースモード！敵の攻撃力が${tc.curse}減少！（${e.atk}）、防御力が${tc.curse}減少！（${e.def}）`)    
+        const curse_atk = e.atk>=tc.curse ? tc.curse　: e.atk
+        const curse_def = e.def>=tc.curse ? tc.curse　: e.def
+
+        e.atk -= curse_atk
+        e.def -= curse_def
+log.add('属性共鳴',`カースモード！敵の攻撃力が${curse_atk}減少！（${e.atk}）、防御力が${curse_def}減少！（${e.def}）`)    
       }
 
       const te = e.clone()　//ターン中にステが変化するためクローン
@@ -108,6 +115,9 @@ log.add('属性共鳴',`カースモード！敵の攻撃力が${tc.curse}減少
 
       //行動順判定 PC先手：true PC後手：false
       let character_move = tc.spd >= te.spd // 同値はPC有利のためPC先手
+      if(te.name=='パープルボックス'){
+        Logger.log("PC" + tc.spd +"   敵"+ te.spd)
+      }
 log.add('イニシアチブ',`先手：${character_move?tc.name:te.name}`)  
       // 戦闘処理
       for (let i = 0; i < 2; i++) {  //先手が0で後手が1　2になったら処理終わり
@@ -180,7 +190,7 @@ log.add('敵回避',`防御力が${avo_effect}上昇！（${te.def}）`)
             }
 
             // ダメージ算出
-            let damage = tc.atk - te.def
+            let damage = Math.max(tc.atk - te.def,0)
             if (avo_dice <= 0) {
               const crit_effect = Math.floor(damage * tc.crit_multi)
 log.add('必中',`必中！必中倍率${tc.crit_multi}。ダメージが${crit_effect}増加！`) 
@@ -191,6 +201,9 @@ log.add('必中',`必中！必中倍率${tc.crit_multi}。ダメージが${crit_
             if (damage > 0) {
               te.hp -= damage
 log.add('ダメージ',`${te.name}に${damage}のダメージを与えた！（HP${te.hp}）`) 
+            }else{
+log.add('ダメージ',`${te.name}にダメージを与えられなかった！（HP${te.hp}）`) 
+
             }
 
             // 死亡判定
@@ -278,7 +291,10 @@ log.add('ダメージ',`${tc.name}は${damage}のダメージを受けた！（H
               tc.mp -= te.magic_reduce
 log.add('魔力減少',`${te.name}の魔力減少効果！${tc.name}はMPが${te.magic_reduce}減少！（MP${tc.mp}）`) 
             }
-          }
+          }else{
+log.add('ダメージ',`${tc.name}は攻撃を防いだ！（HP${tc.hp}）`) 
+
+            }
 
           // 死亡判定
           if (tc.hp < 0) {  // PC死亡 敗北
@@ -308,14 +324,14 @@ log.add('区切り線',`---------------`)
 log.add('結果',`${result==1?'勝利':result==0?'引き分け':'敗北'}！`) 
     return {
       result: result, // 勝利：1　引き分け：0　敗北　-1
-      detail: log.result('battle'),
+      detail: log.result('battle',INFO),
       hp_used: hp_before - Math.min(c.hp, c.maxhp), // 戦闘中は最大値をこえて回復するが、終了時に最大値まで戻る
       mp_used: mp_before - Math.min(c.mp, c.maxhp)  // MPが増えることはなさそうだが一応
     }
   }
 
-  run(times = 100) {
-    const loop = times > 10000 ? 10000 : times // 念の為最大回数制限
+  run(times = 10, log = 10) {
+    const loop = times > 1000 ? 1000 : times // 念の為最大回数制限
     const stat = {
       try: loop,
       win: 0,
@@ -326,7 +342,7 @@ log.add('結果',`${result==1?'勝利':result==0?'引き分け':'敗北'}！`)
       mp_used: {}
     }
     for (let i = 0; i < loop; i++) {
-      const r = this.exec(!i)
+      const r = this.exec(i<log)
       if (r?.result === 1) {
         stat.win++
       }
@@ -336,8 +352,9 @@ log.add('結果',`${result==1?'勝利':result==0?'引き分け':'敗北'}！`)
       else if (r?.result === -1) {
         stat.lose++
       } else { throw { message: 'なんか変な結果返ってるよ',value:r?.result } }
-      if (r?.detail) stat.texts.push(r.detail)
-
+      if (r?.detail) {
+        stat.texts.push(r.detail)
+      }
       if (stat.hp_used[r.hp_used] == null) { stat.hp_used[r.hp_used] = 0 }//初回は作る
       stat.hp_used[r.hp_used]++
 
