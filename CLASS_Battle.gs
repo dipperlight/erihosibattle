@@ -57,7 +57,7 @@ log.add('魔力耐性',`敵の魔力耐性！攻撃力が${mr_atk}、防御力�
       c.mdef.dice = Math.trunc(c.mdef.dice / 4)
     }
 
-        Logger.log("PC" + c.spd +"   敵"+ e.spd + "  " + this.underwater)
+      //  Logger.log("PC" + c.spd +"   敵"+ e.spd + "  " + this.underwater)
     // 水中処理
     if (this.underwater) {
       const water = c.race=='魚人'? 2 : -2
@@ -116,7 +116,7 @@ log.add('属性共鳴',`カースモード！敵の攻撃力が${curse_atk}減�
       //行動順判定 PC先手：true PC後手：false
       let character_move = tc.spd >= te.spd // 同値はPC有利のためPC先手
       if(te.name=='パープルボックス'){
-        Logger.log("PC" + tc.spd +"   敵"+ te.spd)
+        //Logger.log("PC" + tc.spd +"   敵"+ te.spd)
       }
 log.add('イニシアチブ',`先手：${character_move?tc.name:te.name}`)  
       // 戦闘処理
@@ -188,7 +188,11 @@ log.add('敵回避',`敵の回避！`)
 log.add('敵回避',dice.text())
 log.add('敵回避',`防御力が${avo_effect}上昇！（${te.def}）`) 
             }
-
+            // 曲剣補正
+            if(["曲剣"].includes(tc.weapon.type)){
+              tc.atk += tc.hit
+log.add('曲剣補正',`曲剣効果！攻撃力が${tc.hit}上昇！（${tc.atk}）`) 
+            }
             // ダメージ算出
             let damage = Math.max(tc.atk - te.def,0)
             if (avo_dice <= 0) {
