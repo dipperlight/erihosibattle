@@ -13,7 +13,7 @@ class Item extends Clonable {
       this.magic_value = Number(rn.magic)
       this.element = rn.elem
       this.signature = rn.sign ? rn.sign.slice(1, -3) : ''
-      this.type = (['武具', '防具'].includes(this.category)) ? rn.type.slice(3) : rn.type
+      this.type = (['防具'].includes(this.category)) ? rn.type.slice(3) : rn.type
       this.mark = (['武具'].includes(this.category)) ? rn.mark.slice(2) : null
     } else {
       this.name = ''
