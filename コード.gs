@@ -12,8 +12,32 @@ const CALC_SHEET_NAME = '処理用シート',
   RESULT_OUTPUT_COL_SIZE=7,
   LOG_SHEET_NAME='戦闘ログ'
 
+function sumple(){
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getActiveSheet();
+  const cell = sheet.getActiveCell();
+  const rangeRow = cell.getRow();
+  const rangeCol = cell.getColumn();
+  if (sheet.getName() == BATTLE_SHEET_NAME){
+    if (rangeRow == ENEMY_CELL_ROW && rangeCol == ENEMY_CELL_COL) {
+  Logger.log("**"+sheet.getName()+" , "+rangeRow+" , "+rangeCol)
+      update_battle_group()
+    }
+    if (rangeRow == 28 && rangeCol == 8) {
+  Logger.log("**"+sheet.getName()+" , "+rangeRow+" , "+rangeCol)
+      simulate_battle()
+    }
+  }
+}
+
 var update_battle_group = () => {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getActiveSheet();
+  const sheet_name = sheet.getSheetName()
+  const cell = sheet.getActiveCell();
+  const rangeRow = cell.getRow();
+  const rangeCol = cell.getColumn();
+  if(!(sheet_name==BATTLE_SHEET_NAME&&rangeRow==ENEMY_CELL_ROW&&rangeCol==ENEMY_CELL_COL)){return}
   const enemies = ss.getSheetByName(CALC_SHEET_NAME).getRange(ENEMYLIST_POS_ROW, ENEMYLIST_POS_COL, MAX_ENEMY_ROW, ENEMY_COL_SIZE).getValues();
   // Logger.log(JSON.stringify(enemies))
 
@@ -40,12 +64,11 @@ var update_battle_group = () => {
       ] : new Array(ENEMY_OUTPUT_COL_SIZE).fill('-');
   }
   // Logger.log(JSON.stringify(enemy_view))
-
-  const sheet = ss.getSheetByName(BATTLE_SHEET_NAME);
   sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL, MAX_ENEMY_ROW, ENEMY_OUTPUT_COL_SIZE).setValues(enemy_view)
   sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(
     new Array(MAX_ENEMY_ROW).fill(new Array(RESULT_OUTPUT_COL_SIZE).fill('-'))
   )
+  simulate_battle()
 }
 
 var simulate_battle = () => {

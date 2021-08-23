@@ -26,7 +26,7 @@ class Battle {
 
     // 戦闘開始前処理 ***********************
 
-    if (c.weapon.weght()=='重') {
+    if (c.weapon.weight()=='重') {
       c.penetrate -= e.rank
     }
     // 魔法最大値

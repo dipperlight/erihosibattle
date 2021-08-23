@@ -82,7 +82,7 @@ class BattleCharactor extends Charactor {
       + armor.material_value
 
     this.matk = {
-      dice: Math.floor(this.mnd / 2) + weapon.magic_value + (this.job == '魔術師' ? 1 : 0),
+      dice: Math.floor(this.mnd / 2) + weapon.magic_value + (this.job == '魔術師' ? 1 : 0)+ (this.weapon.mark == '触媒' ? 1 : 0),
       max: 25 + this.mnd * 3 + weapon.rank * 10 + this.degree * 5,
       free: false,
       add: (['杖'].includes(weapon.type) ? weapon.magic_value : 0)
@@ -96,7 +96,7 @@ class BattleCharactor extends Charactor {
     this.special_reduce = 0
     this.crit_multi = 0.2
     this.crit_taken = 0.2
-    this.penetrate = this.weapon.weight()=="重"? 0.2 : 0
+    this.penetrate = this.weapon.weight()=="重"? 20 : 0
     this.regen = 0
     this.curse = 0
     this.ghost_effect = 0

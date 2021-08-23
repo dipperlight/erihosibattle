@@ -2,11 +2,15 @@ class Item extends Clonable {
   constructor(spec_text) {
     super()
     this.text = spec_text
+    const r1 = spec_text.match(/^(?<name>〈.+〉)?\s*(?<category>.+)\//)
+    if (r1) {
+    const r1n = r1.groups
+      this.name = rn.name.slice(1, -1)
+      this.category = rn.category
+    }
     const r = spec_text.match(/^(?<name>〈.+〉)?\s*(?<category>.+)\((?<rank>\d+)\)\/(?<value>\d+)\/(?<proc>\d+)\/(?<magic>\d+)\/(?<elem>.)\/(?<sign>【.+】作。)?(?<mark>.+の武具：)?(?<type>.+)系。$/u)
     if (r) {
       const rn = r.groups
-      this.name = rn.name.slice(1, -1)
-      this.category = rn.category
       this.rank = Number(rn.rank)
       this.material_value = Number(rn.value)
       this.process_value = Number(rn.proc)
@@ -14,8 +18,7 @@ class Item extends Clonable {
       this.element = rn.elem
       this.signature = rn.sign ? rn.sign.slice(1, -3) : ''
       this.type = (['防具'].includes(this.category)) ? rn.type.slice(3) : rn.type
-      this.mark = (['武具'].includes(this.category)) ? rn.mark.slice(2) : null
-    } else {
+      this.mark = rn.mark?.slice(2)
       this.name = ''
       this.category = ''
       this.rank = 0
