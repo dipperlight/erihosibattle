@@ -2,33 +2,29 @@ class Item extends Clonable {
   constructor(spec_text) {
     super()
     this.text = spec_text
-    const r1 = spec_text.match(/^(?<name>〈.+〉)?\s*(?<category>.+)\//)
+    const r1 = spec_text.match(/^(?<name>〈.+〉)?\s*(?<category>.+)\(/)
     if (r1) {
     const r1n = r1.groups
-      this.name = rn.name.slice(1, -1)
-      this.category = rn.category
+      this.name = r1n.name.slice(1, -1)
+      this.category = r1n.category
     }
-    const r = spec_text.match(/^(?<name>〈.+〉)?\s*(?<category>.+)\((?<rank>\d+)\)\/(?<value>\d+)\/(?<proc>\d+)\/(?<magic>\d+)\/(?<elem>.)\/(?<sign>【.+】作。)?(?<mark>.+の武具：)?(?<type>.+)系。$/u)
-    if (r) {
-      const rn = r.groups
-      this.rank = Number(rn.rank)
-      this.material_value = Number(rn.value)
-      this.process_value = Number(rn.proc)
-      this.magic_value = Number(rn.magic)
-      this.element = rn.elem
-      this.signature = rn.sign ? rn.sign.slice(1, -3) : ''
-      this.type = (['防具'].includes(this.category)) ? rn.type.slice(3) : rn.type
-      this.mark = rn.mark?.slice(2)
-      this.name = ''
-      this.category = ''
-      this.rank = 0
-      this.material_value = 0
-      this.process_value = 0
-      this.magic_value = 0
-      this.element = '無'
-      this.signature = ''
-      this.type = ''
-    }
+    const regexp =
+    this.category=="武具"? new RegExp(/武具\((?<rank>\d+)\)\/(?<value>\d+)\/(?<proc>\d+)\/(?<magic>\d+)\/(?<elem>.)\/(?<sign>【.+】作。)?(?<mark>.+)の武具：(?<type>.+)系。$/,'u') :
+    this.category=="防具"? new RegExp(/防具\((?<rank>\d+)\)\/(?<value>\d+)\/(?<proc>\d+)\/(?<magic>\d+)\/(?<elem>.)\/(?<sign>【.+】作。)?防具：(?<type>.+)系。$/,'u') :
+     null
+
+    const r2 = spec_text.match(regexp)
+    if (r2) {
+      const r2n = r2.groups
+      this.rank = Number(r2n.rank)
+      this.material_value = Number(r2n.value)
+      this.process_value = Number(r2n.proc)
+      this.magic_value = Number(r2n.magic)
+      this.element = r2n.elem
+      this.signature = r2n.sign ? r2n.sign.slice(1, -3) : ''
+      this.type = r2n.type
+      this.mark = r2n.mark
+      }
   }
 
   weight() {
