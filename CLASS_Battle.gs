@@ -25,6 +25,10 @@ class Battle {
     //戦闘開始
 
     // 戦闘開始前処理 ***********************
+
+    if (c.weapon.weght()=='重') {
+      c.penetrate -= e.rank
+    }
     // 魔法最大値
     //敵ランク分
       c.matk.max -= e.rank * 5
@@ -167,11 +171,10 @@ log.add('魔法攻撃',`MPが足りない為、失敗！`)
               }
             }
 
-            //重武器による防御貫通
-            //敵の回避による防御上昇の後に判定されるのか否か？　ここでは　「カースモードの影響を受ける、回避ダイスの影響は受けない」　と扱う
-            //ここはよくわからん /* UNCERTAIN */
-            if (tc.weapon.weight() == '重') {
-              const penetrate_effect = Math.floor(te.def * (20 - te.rank) / 100)
+            //防御貫通
+            //「カースモードの影響を受ける、回避ダイスの影響は受けない、殴打性質と重武器の効果は加算『敵防御*(10+20-敵R貫通)』」　と扱う　/* UNCERTAIN */
+            if (tc.penetrate>0) {
+              const penetrate_effect = Math.floor(te.def * tc.penetrate / 100)
               te.def -= penetrate_effect
 log.add('重武器貫通',`重武具効果！敵の防御力を${penetrate_effect}無視！`) 
             }

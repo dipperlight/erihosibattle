@@ -96,11 +96,31 @@ class BattleCharactor extends Charactor {
     this.special_reduce = 0
     this.crit_multi = 0.2
     this.crit_taken = 0.2
+    this.penetrate = this.weapon.weight()=="重"? 0.2 : 0
     this.regen = 0
     this.curse = 0
     this.ghost_effect = 0
     this.box_effect = 0
     this.box_spd = 0
+
+    // 武器特性
+    switch (this.weapon.mark) {
+      case '斬撃':
+        this.hit += 1
+        this.atk += 5
+        break;
+      case '刺突':
+        this.crit_multi += 0.1
+        break;
+      case '射撃':
+        this.spd += 1
+        break;
+      case '殴打':
+        this.penetrate += 10
+        break;
+      case '触媒':
+        break;
+    }
 
     // 属性共鳴
     this.mode = (ELEMENTS.includes(weapon.element) && weapon.element == armor.element) ? weapon.element : '無'
