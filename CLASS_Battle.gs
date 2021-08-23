@@ -176,7 +176,7 @@ log.add('魔法攻撃',`MPが足りない為、失敗！`)
             if (tc.penetrate>0) {
               const penetrate_effect = Math.floor(te.def * tc.penetrate / 100)
               te.def -= penetrate_effect
-log.add('重武器貫通',`重武具効果！敵の防御力を${penetrate_effect}無視！`) 
+log.add('防御貫通',`防御貫通！敵の防御力を${penetrate_effect}無視！`) 
             }
 
             // 必中判定
