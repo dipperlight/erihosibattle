@@ -73,14 +73,14 @@ log.add('魔力耐性',`敵の魔力耐性！攻撃力が${mr_atk}、防御力�
     // 種族特効
     switch (e.race) {
       case '死霊':
-        if (c.weapon.element=='塩'){
+        if (c.mode=='塩'){
         c.atk += c.ghost_effect
         c.def += c.ghost_effect
 log.add('属性共鳴',`セイントモード！攻撃力が${c.ghost_effect}、防御力が${c.ghost_effect}増加！`)
         }
         break;
       case '器物':
-        if (c.weapon.element=='酸'){
+        if (c.mode=='酸'){
         c.atk += c.box_effect
         c.spd += c.box_spd
 log.add('属性共鳴',`デストロイヤーモード！攻撃力が${c.box_effect}、速度が${c.box_spd}増加！`)
