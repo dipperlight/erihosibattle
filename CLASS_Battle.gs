@@ -133,7 +133,7 @@ log.add('イニシアチブ',`先手：${character_move?tc.name:te.name}`)
 log.add('PC攻撃開始',`${tc.name}の攻撃`)
           if (['専守防衛'].includes(offensive_command)) { // 専守防衛のときはまるごと飛ばす
             // 専守防衛
-log.add('専守防衛',`専守防衛！防御力が${tc.dex}上昇！（${tc.def}）`)  
+log.add('専守防衛',`専守防衛！防御力が${tc.dex*2}上昇！（${tc.def}）`)  
           }else{
             //弱点
             if (tc.weapon.element == te.week_element) {

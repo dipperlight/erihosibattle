@@ -194,7 +194,7 @@ class BattleCharactor extends Charactor {
         // 攻撃系コマンド
         case '通常攻撃':
           break;
-        case '全力攻撃':　　//全力攻撃は一応、ターン開始時に発動してステ変動もそのときに行われる想定 /* UNCERTAIN */
+        case '全力攻撃':　　//全力攻撃はターン開始時に発動してステ変動もそのときに行われる想定 /* UNCERTAIN */
           if (this.weapon.weight() == '重' && this.hp > 2) {
             this.atk += full_atk_ref * 2 + Math.floor(this.weapon.process_value / 2)
             this.def += full_atk_ref * -1
@@ -213,10 +213,10 @@ class BattleCharactor extends Charactor {
           this.hit += 1;
           this.avo += -1
           break;
-        case '魔法攻撃':　　//魔法攻撃の詠唱はPCの攻撃する直前　ここでは計算しない/* UNCERTAIN */
+        case '魔法攻撃':
           break;
         case '専守防衛':
-          this.def += full_atk_ref * 2
+          this.def += this.dex * 2
           break;
         // 防御系コマンド
         case '通常防御':
@@ -233,7 +233,7 @@ class BattleCharactor extends Charactor {
           this.hit += -1;
           this.avo += 1
           break;
-        case '魔法防御':  //魔法防御の詠唱はPCが攻撃される直前　ここでは計算しない/* UNCERTAIN */
+        case '魔法防御':
           break;
         case '逃走':
           break;
