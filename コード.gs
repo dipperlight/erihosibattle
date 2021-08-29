@@ -92,7 +92,7 @@ var simulate_battle = (ss=SpreadsheetApp.getActiveSpreadsheet(),sheet=ss.getActi
   let logs = new Array(MAX_ENEMY_ROW)
   for (let i = 0; i < MAX_ENEMY_ROW; i++) {
     if (enemys[i]){
-Logger.log(enemys[i])
+//Logger.log(enemys[i])
       const battle = new Battle(
         battleCharactor,
         enemys[i],

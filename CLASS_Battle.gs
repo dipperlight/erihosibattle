@@ -95,8 +95,8 @@ log.log('魔力耐性',`魔力反応：${e.magic_reaction}`,'battle',DEBUG)
     if (e.magic_reaction) {
       const mr_atk = c.armor.magic_value*e.rank
       const mr_def = c.weapon.magic_value*e.rank
-      c.atk = mr_atk>c.atk? 0 : c.atk - mr_atk
-      c.def = mr_def>c.def? 0 : c.def - mr_def    
+      c.atk = Math.max(0, c.atk - mr_atk)
+      c.def = Math.max(0, c.def - mr_def)
 log.add('魔力耐性',`敵の魔力耐性！攻撃力が${mr_atk}、防御力が${mr_def}減少！`)
     }
 
@@ -172,7 +172,7 @@ log.add('霊体','霊体logging')
       }
       tc.command(offensive_command, defensive_command)
 
-      if(tc.weapon.mark = "射撃"){
+      if(tc.weapon.mark == "射撃"){
         tc.atk += Math.floor(tc.spd/3)
 log.add('射撃','射撃速度ダメボlogging')
       }
