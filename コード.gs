@@ -5,12 +5,13 @@ const CALC_SHEET_NAME = '処理用シート',
   ENEMY_TARGET_ROW = 3,
   ENEMY_TARGET_COL = 14,
   MAX_ENEMY_ROW = 30,
-  ENEMY_COL_SIZE = 22,
+  ENEMY_COL_SIZE = 26,
   ENEMYLIST_POS_ROW = 1,
   ENEMYLIST_POS_COL = 1,
-  ENEMY_OUTPUT_COL_SIZE = 15,
+  ENEMY_OUTPUT_COL_SIZE = 13,
   RESULT_OUTPUT_COL_SIZE=7,
-  LOG_SHEET_NAME='戦闘ログ'
+  LOG_SHEET_NAME='戦闘ログ',
+  DATA_SHEET_NAME="処理用シート"
 
 function sumple(){
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -20,61 +21,17 @@ function sumple(){
   const rangeCol = cell.getColumn();
   if (sheet.getName() == BATTLE_SHEET_NAME){
     if (rangeRow == ENEMY_CELL_ROW && rangeCol == ENEMY_CELL_COL) {
-  Logger.log("**"+sheet.getName()+" , "+rangeRow+" , "+rangeCol)
-      update_battle_group()
+      simulate_battle(ss,sheet,cell)
     }
     if (rangeRow == 28 && rangeCol == 8) {
-  Logger.log("**"+sheet.getName()+" , "+rangeRow+" , "+rangeCol)
-      simulate_battle()
+      simulate_battle(ss,sheet,cell)
     }
   }
 }
 
-var update_battle_group = () => {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getActiveSheet();
-  const sheet_name = sheet.getSheetName()
-  const cell = sheet.getActiveCell();
-  const rangeRow = cell.getRow();
-  const rangeCol = cell.getColumn();
-  if(!(sheet_name==BATTLE_SHEET_NAME&&rangeRow==ENEMY_CELL_ROW&&rangeCol==ENEMY_CELL_COL)){return}
-  const enemies = ss.getSheetByName(CALC_SHEET_NAME).getRange(ENEMYLIST_POS_ROW, ENEMYLIST_POS_COL, MAX_ENEMY_ROW, ENEMY_COL_SIZE).getValues();
-  // Logger.log(JSON.stringify(enemies))
-
-  let enemy_view = new Array(MAX_ENEMY_ROW);
-  for (let i = 0; i < MAX_ENEMY_ROW; i++) {
-    const enemy = enemies[i]
-    enemy_view[i] =
-      enemy[0] ? [
-        enemy[0],
-        enemy[1],
-        enemy[2],
-        ranged_text(enemy[3], enemy[4], 3),
-        ranged_text(enemy[5], enemy[6], 3),
-        ranged_text(enemy[7], enemy[8], 3),
-        ranged_text(enemy[9], enemy[10], 2),
-        ranged_text(enemy[11], enemy[12], 2),
-        ranged_text(enemy[13], enemy[14], 2),
-        enemy[15],
-        enemy[16] || '-',
-        enemy[17] ? '有' : '-',
-        enemy[18] || '-',
-        enemy[19],
-        enemy[20] ? enemy[20] + enemy[21] : '-'
-      ] : new Array(ENEMY_OUTPUT_COL_SIZE).fill('-');
-  }
-  // Logger.log(JSON.stringify(enemy_view))
-  sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL, MAX_ENEMY_ROW, ENEMY_OUTPUT_COL_SIZE).setValues(enemy_view)
-  sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(
-    new Array(MAX_ENEMY_ROW).fill(new Array(RESULT_OUTPUT_COL_SIZE).fill('-'))
-  )
-  simulate_battle()
-}
-
-var simulate_battle = () => {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(BATTLE_SHEET_NAME)
+var simulate_battle = (ss,sheet,cell) => {
   const sheet_log = ss.getSheetByName(LOG_SHEET_NAME)
+  const sheet_data = ss.getSheetByName(DATA_SHEET_NAME)
 
   // キャラクター
   const name = sheet.getRange('C2').getValue()
@@ -94,25 +51,29 @@ var simulate_battle = () => {
   const underwater = sheet.getRange('L7').getValue()
 
   // 敵配列
-  const enemys = sheet.getRange('N3:AB32').getValues().map(row =>{
+  const enemys = sheet_data.getRange('A2:Z31').getValues().map(row =>{
     if (row[0]&&row[0]!='-'){
       return new Enemy(
         row[0],
         row[1],
         row[2],
-        pop_max(row[3]),
-        pop_max(row[4]),
-        pop_max(row[5]),
-        pop_max(row[6]),
-        pop_max(row[7]),
-        pop_max(row[8]),
-        row[9],
+        row[4],
+        row[6],
+        row[8],
         row[10],
-        typeof (row[11]) === "boolean" ? row[11] : ['有', '○', '◯', 1].includes(row[11]),
         row[12],
-        row[13],
-        row[14].match(/^([^\d]+)(\d+)$/)?.[1] ?? '？',
-        row[14].match(/^([^\d]+)(\d+)$/)?.[2] ?? 0
+        row[14],
+        row[15],
+        row[16],
+        row[17],
+        row[18],
+        row[19],
+        row[20],
+        row[21],
+        row[22],
+        row[23],
+        row[24],
+        row[25],
       )
     }else{
       return null
