@@ -23,8 +23,56 @@ class Battle {
     const mp_before = c.mp
 
     //戦闘開始
-
     // 戦闘開始前処理 ***********************
+
+    //敵特性反映
+    // 装甲
+    if(e.prop_armored){
+      if (c.weapon.mark=="殴打"){
+log.add('装甲','装甲無効logging')
+      }else{
+        e.def += e.rank * 2
+log.add('装甲','装甲logging')
+      }
+    }
+
+    // 軟体
+    if(e.prop_slime){
+      if (c.weapon.mark=="斬撃"){
+log.add('軟体','軟体無効logging')
+      }else{
+        e.def += Math.floor(e.rank * 1.5)
+        c.penetrate = 0
+log.add('軟体','軟体logging')
+      }
+    }
+
+    // 結界
+    if(e.prop_barrier){
+      if (c.weapon.mark=="刺突"){
+log.add('結界','結界無効logging')
+      }else{
+        e.def += Math.floor(e.rank * 1.5)
+        c.matk.max = Math.max(0,c.matk.max-10)
+log.add('結界','結界logging')
+      }
+    }
+
+    // 飛行
+    if(e.prop_flying){
+      if (c.weapon.mark=="射撃"){
+log.add('飛行','飛行無効logging')
+      }else{
+        e.avo += 1 + Math.floor(e.rank/3)
+log.add('飛行','飛行logging')
+      }
+    }
+    // 属性耐性
+      if(e.resist_element == c.weapon.element){
+        c.atk = Math.max(0,c.atk-e.rank*3)
+log.add('属性耐性','属性耐性logging')
+      }
+
 
     if (c.weapon.weight()=='重') {
       c.penetrate -= e.rank
@@ -37,12 +85,9 @@ class Battle {
     // 魔力耐性
 log.log('魔力耐性',`魔力耐性：${e.magic_resist}`,'battle',DEBUG)
     if (e.magic_resist) {
-      c.matk.max -= e.magic_resist
-      c.mdef.max -= e.magic_resist
+      c.matk.max = Math.max(0,c.matk.max - e.magic_resist)
+      c.mdef.max = Math.max(0,c.mdef.max - e.magic_resist)
     }
-    // 0未満にはならない
-    c.matk.max = c.matk.max<0? 0: c.matk.max
-    c.mdef.max = c.mdef.max<0? 0: c.mdef.max
 log.add('魔力最大値',`魔攻最大値:${c.matk.max} , 魔防最大値:${c.mdef.max} `)
 
     // 魔力反応処理
@@ -115,7 +160,24 @@ log.add('属性共鳴',`カースモード！敵の攻撃力が${curse_atk}減�
       //　コマンドによるステ変化
       const offensive_command = this.command.offense(turn)
       const defensive_command = this.command.defense(turn)
+      // 「PCの攻撃力」は「全力攻撃・魔法攻撃・弱点攻撃の影響を受けない」ものとして扱う/* UNCERTAIN */
+      // 霊体効果
+      if(e.prop_spirit){
+        if (offensive_command=="魔法攻撃"){
+log.add('霊体','魔法攻撃による無効化logging')
+        }else{
+          tc.atk = Math.max(0,tc.atk-te.rank*3)
+log.add('霊体','霊体logging')
+        }
+      }
       tc.command(offensive_command, defensive_command)
+
+      if(tc.weapon.mark = "射撃"){
+        tc.atk += Math.floor(tc.spd/3)
+log.add('射撃','射撃速度ダメボlogging')
+      }
+
+
 
       //行動順判定 PC先手：true PC後手：false
       let character_move = tc.spd >= te.spd // 同値はPC有利のためPC先手
@@ -137,7 +199,12 @@ log.add('専守防衛',`専守防衛！防御力が${tc.dex*2}上昇！（${tc.d
           }else{
             //弱点
             if (tc.weapon.element == te.week_element) {
-              dice.roll(tc.weapon.rank)
+              let dice_num = tc.weapon.rank
+              if (te.race=="竜"){
+                dice_num = Math.max(0,dice_num-3)
+log.add('龍鱗','龍鱗logging')
+              }
+              dice.roll(dice_num)
               const week_effect = dice.sum()
               tc.atk += week_effect
 log.add('弱点攻撃',`${te.week_element}弱点！`) 

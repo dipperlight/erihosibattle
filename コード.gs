@@ -23,13 +23,19 @@ function sumple(){
     if (rangeRow == ENEMY_CELL_ROW && rangeCol == ENEMY_CELL_COL) {
       simulate_battle(ss,sheet,cell)
     }
-    if (rangeRow == 28 && rangeCol == 8) {
+    if (rangeRow == 27 && rangeCol == 8) {
       simulate_battle(ss,sheet,cell)
     }
   }
 }
 
-var simulate_battle = (ss,sheet,cell) => {
+var simulate_battle = (ss=SpreadsheetApp.getActiveSpreadsheet(),sheet=ss.getActiveSheet(),cell=sheet.getActiveCell()) => {
+  
+  // 戦績リセット
+  sheet.getRange(ENEMY_TARGET_ROW, ENEMY_TARGET_COL+ENEMY_OUTPUT_COL_SIZE, MAX_ENEMY_ROW, RESULT_OUTPUT_COL_SIZE).setValues(
+    new Array(MAX_ENEMY_ROW).fill(new Array(RESULT_OUTPUT_COL_SIZE).fill('-'))
+  )
+
   const sheet_log = ss.getSheetByName(LOG_SHEET_NAME)
   const sheet_data = ss.getSheetByName(DATA_SHEET_NAME)
 
@@ -66,11 +72,11 @@ var simulate_battle = (ss,sheet,cell) => {
         row[15],
         row[16],
         row[17],
-        row[18],
-        row[19],
-        row[20],
-        row[21],
-        row[22],
+        Boolean(row[18]),
+        Boolean(row[19]),
+        Boolean(row[20]),
+        Boolean(row[21]),
+        Boolean(row[22]),
         row[23],
         row[24],
         row[25],
@@ -86,7 +92,7 @@ var simulate_battle = (ss,sheet,cell) => {
   let logs = new Array(MAX_ENEMY_ROW)
   for (let i = 0; i < MAX_ENEMY_ROW; i++) {
     if (enemys[i]){
-
+Logger.log(enemys[i])
       const battle = new Battle(
         battleCharactor,
         enemys[i],
