@@ -110,7 +110,7 @@ class BattleCharactor extends Charactor {
         this.atk += 5
         break;
       case '刺突':
-        this.crit_multi += 0.1
+        this.crit_multi = Math.trunc((this.crit_multi+0.1)*10)/10
         break;
       case '射撃':
         this.spd += 1

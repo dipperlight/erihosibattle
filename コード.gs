@@ -62,16 +62,16 @@ var simulate_battle = (ss=SpreadsheetApp.getActiveSpreadsheet(),sheet=ss.getActi
       return new Enemy(
         row[0],
         row[1],
-        row[2],
-        row[4],
-        row[6],
-        row[8],
-        row[10],
-        row[12],
-        row[14],
+        Number(row[2]),
+        Number(row[4]),
+        Number(row[6]),
+        Number(row[8]),
+        Number(row[10]),
+        Number(row[12]),
+        Number(row[14]),
         row[15],
         row[16],
-        row[17],
+        Number(row[17]),
         Boolean(row[18]),
         Boolean(row[19]),
         Boolean(row[20]),
@@ -79,7 +79,7 @@ var simulate_battle = (ss=SpreadsheetApp.getActiveSpreadsheet(),sheet=ss.getActi
         Boolean(row[22]),
         row[23],
         row[24],
-        row[25],
+        Number(row[25])
       )
     }else{
       return null

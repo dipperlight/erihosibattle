@@ -29,48 +29,50 @@ class Battle {
     // 装甲
     if(e.prop_armored){
       if (c.weapon.mark=="殴打"){
-log.add('装甲','装甲無効logging')
+log.add('装甲','殴打の武具で、装甲を無効化！')
       }else{
         e.def += e.rank * 2
-log.add('装甲','装甲logging')
+log.add('装甲',`敵の装甲！敵防御力が${e.rank * 2}上昇(${e.def})！`)
       }
     }
 
     // 軟体
     if(e.prop_slime){
       if (c.weapon.mark=="斬撃"){
-log.add('軟体','軟体無効logging')
+log.add('軟体','斬撃の武具で軟体を無効化！')
       }else{
         e.def += Math.floor(e.rank * 1.5)
         c.penetrate = 0
-log.add('軟体','軟体logging')
+log.add('軟体',`敵の軟体！敵防御力が${Math.floor(e.rank * 1.5)}上昇(${e.def})！防御貫通を無効化！`)
+log.add('軟体',`敵の軟体！防御貫通を無効化！`)
       }
     }
 
     // 結界
     if(e.prop_barrier){
       if (c.weapon.mark=="刺突"){
-log.add('結界','結界無効logging')
+log.add('結界','刺突の武具で結界を無効化！')
       }else{
         e.def += Math.floor(e.rank * 1.5)
         c.matk.max = Math.max(0,c.matk.max-10)
-log.add('結界','結界logging')
+log.add('結界',`敵の結界！敵防御力が${Math.floor(e.rank * 1.5)}上昇(${e.def})！`)
+log.add('結界',`敵の結界！魔法攻撃上限が10低下(${c.matk.max})！`)
       }
     }
 
     // 飛行
     if(e.prop_flying){
       if (c.weapon.mark=="射撃"){
-log.add('飛行','飛行無効logging')
+log.add('飛行','射撃の武具で飛行を無効化！')
       }else{
         e.avo += 1 + Math.floor(e.rank/3)
-log.add('飛行','飛行logging')
+log.add('飛行',`敵の飛行！敵回避が${1 + Math.floor(e.rank/3)}上昇！(${e.avo})`)
       }
     }
     // 属性耐性
       if(e.resist_element == c.weapon.element){
         c.atk = Math.max(0,c.atk-e.rank*3)
-log.add('属性耐性','属性耐性logging')
+log.add('属性耐性',`敵の${e.resist_element}耐性！攻撃力が${e.rank*3}低下(${c.atk})！`)
       }
 
 
@@ -164,17 +166,17 @@ log.add('属性共鳴',`カースモード！敵の攻撃力が${curse_atk}減�
       // 霊体効果
       if(e.prop_spirit){
         if (offensive_command=="魔法攻撃"){
-log.add('霊体','魔法攻撃による無効化logging')
+log.add('霊体','魔法攻撃で霊体を無効化！')
         }else{
           tc.atk = Math.max(0,tc.atk-te.rank*3)
-log.add('霊体','霊体logging')
+log.add('霊体',`敵の霊体！攻撃力が${te.rank*3}低下(${tc.atk})！`)
         }
       }
       tc.command(offensive_command, defensive_command)
 
       if(tc.weapon.mark == "射撃"){
         tc.atk += Math.floor(tc.spd/3)
-log.add('射撃','射撃速度ダメボlogging')
+log.add('射撃',`射撃武具により攻撃力が${Math.floor(tc.spd/3)}上場(${tc.atk})！`)
       }
 
 
